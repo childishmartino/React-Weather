@@ -25,6 +25,7 @@ const HomePage = () => {
                 cityName: searchData.name,
                 lat: searchData.coord.lat,
                 lon: searchData.coord.lon,
+                
             };
 
             const uvResponse = await searchUv(cityData.lat, cityData.lon);
