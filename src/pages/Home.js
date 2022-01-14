@@ -6,7 +6,7 @@ const HomePage = () => {
     const [searchInput, setSearchInput] = useState('');
     const [searchedCity, setSearchedCity] = useState([]);
     const [forecastData, setForecastData] = useState([]);
-    const [backgroundImage, setBackgroundImage] = useState([])
+    const [cityImage, setBackgroundImage] = useState('')
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
@@ -44,7 +44,7 @@ const HomePage = () => {
                 .then(response => response.json())
                 .then(data => {
                     const { daily } = data
-                    const sevenDayForecast = daily.map((day) => ({
+                    const sevenDayForecast = daily.slice(1).map((day) => ({
                         day: new Date(day.dt * 1000).toLocaleDateString("en-US", {weekday: 'long'}),
                         date: new Date(day.dt *1000).toLocaleDateString("en-US"),
                         tempMin: day.temp.min,
@@ -54,20 +54,23 @@ const HomePage = () => {
                         weatherIcon: day.weather[0].icon
                     }));
                     const forecast = todayForecast.concat(sevenDayForecast)
+                    console.log(forecast)
                     setForecastData(forecast);
                 });
 
             getBackgroundImage(cityData.cityName)
                 .then(response => response.json())
                 .then(data => {
-                    const cityImage = data
-                    console.log(cityImage)
+                    const { results } = data
+                    const imageResult = results.slice(0, 1)
+                    const cityPic = imageResult[0].urls.raw
+                    setBackgroundImage(cityPic)
                 });
+                
         } catch (err) {
             console.error(err);
         }
     }
-    console.log(forecastData)
 
     return (
         <Container className='py-4'>
@@ -96,7 +99,8 @@ const HomePage = () => {
                         </Form>
                 </Container>
             </div>
-            <Container className='py-5'>
+            <div className="logo" style={{backgroundImage: `url(${cityImage})`}}>
+                <Container className='py-5'>
                 <h2 className='display-5 fw-bold'> {searchedCity.cityName} </h2>
                 <h3 className='display-5 fw-bold'> {searchedCity.currentTemp} </h3>
                     <Row>
@@ -107,13 +111,18 @@ const HomePage = () => {
                                 <Card.Title>
                                 {day.date === new Date().toLocaleDateString("en-US") ? 'Today' : day.date} <br></br> {day.day}
                                 </Card.Title>
-                                
+                                <Card.Body>
+                                    {day.tempMin ? `Low: ${day.tempMin}` : `Right Now: ${day.temp}`}
+                                    <br></br>
+                                    {day.tempMax ? `High: ${day.tempMax}` : ''}
+                                </Card.Body>
                             </Card>
                         </Col>
                         )
                     })}
                     </Row>
             </Container>
+            </div>
         </Container>
     )
 };
